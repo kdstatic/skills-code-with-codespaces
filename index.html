@@ -1,3 +1,364 @@
-<html>
-  <h1>Hello</h1>
+<?php
+define('DB_NAME', 'amazonididitttttt');
+define('DB_USER', 'root');
+define('DB_PASSWORD', '');
+define('DB_HOST', 'localhost');
+define('DB_TABLE', 'books');
+
+try {
+    // Connection to MySQL server
+    $pdo = new PDO('mysql:host=' . DB_HOST, DB_USER, DB_PASSWORD);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // SQL query to create the database
+    $createDatabaseQuery = "CREATE DATABASE IF NOT EXISTS `" . DB_NAME . "` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci";
+    $pdo->prepare($createDatabaseQuery)->execute();
+
+    // Connection to the created database
+    $connexion = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASSWORD);
+    $connexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // SQL query to create the table
+    $createTableQuery = "
+        CREATE TABLE IF NOT EXISTS `" . DB_TABLE . "` (
+            `mots_cles` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci,
+            `author` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci,
+            `titre` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci,
+            `Editeur` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci,
+            `month_select` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci,
+            `annee` INT,
+            `collection` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci,
+            `rubrique` VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci,
+            `isbn` VARCHAR(20) CHARACTER SET utf8 COLLATE utf8_general_ci,
+            `format` VARCHAR(20) CHARACTER SET utf8 COLLATE utf8_general_ci,
+            `best_sellers` BOOL ,
+            `price` DECIMAL(10, 2)
+
+        ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci;";
+
+
+    // Prepare and execute the table creation query
+    $connexion->prepare($createTableQuery)->execute();
+
+    // Additional books to insert
+    $additionalBooks = [
+        ['Science Fiction', 'Arthur C. Clarke', '2001: A Space Odyssey', 'Penguin Books', 'July', '2022', 'Space Odyssey Series', 'Science Fiction', '978-0-14-143975-1', 'Tous les formats',true,29.99],
+        ['Fantasy', 'Brandon Sanderson', 'Mistborn: The Final Empire', 'Tor Books', 'November', '2021', 'Mistborn Series', 'Fantasy', '978-0-7653-2635-5', 'Poche et broché',false,13.22],
+        ['Historical Fiction', 'Ken Follett', 'The Pillars of the Earth', 'Signet', 'March', '2020', 'Kingsbridge Series', 'Historical Fiction', '978-0-4515-9499-0', 'Livre Audio',true,6],
+        ['Mystery', 'Agatha Christie', 'And Then There Were None', 'HarperCollins', 'June', '1939', 'Stand-alone Mystery', 'Mystery', '978-0-06-207348-8', 'Ebook kindle',true,9.8],
+        ['Science Fiction', 'Philip K. Dick', 'Blade Runner: Do Androids Dream of Electric Sheep?', 'Del Rey Books', '', '', 'N/A', 'Science Fiction', '978-0-345-39180-9', 'Tous les formats',true,6.5],
+        ['Thriller', 'Gillian Flynn', 'Sharp Objects', 'Broadway Books', 'September', '2018', 'N/A', 'Mystery', '978-0-307-58836-0', 'Poche et broché',false,4],
+        ['Fantasy', 'J.R.R. Tolkien', 'The Silmarillion', 'Houghton Mifflin', 'December', '2019', 'Middle-earth Series', 'Fantasy', '978-0-345-39180-9', 'Poche et broché',true,5.5],
+        ['Romance', 'Jane Austen', 'Sense and Sensibility', 'Penguin Classics', 'February', '2022', 'N/A', 'Romance', '978-0-14-143955-3', 'Ebook kindle',true,10.99],
+        ['Science Fiction', 'Isaac Asimov', 'I, Robot', 'Spectra', '', '', 'N/A', 'Science Fiction', '978-0-553-29949-5', 'Tous les formats',true,10.4],
+        ['Historical Fiction', 'Hilary Mantel', 'Bring Up the Bodies', 'Picador', 'October', '2015', 'Thomas Cromwell Trilogy', 'Historical Fiction', '978-0-8050-8068-1', 'Livre Audio',true,13.99],
+        ['Art, Music, and Cinema', 'Haruki Murakami', 'Norwegian Wood', 'Vintage International', 'August', '2017', 'N/A', 'Literary Fiction', '978-0-307-74347-6', 'Poche et broché',true,12.99],
+        ['Cuisine and Vins', 'Julia Child', 'Mastering the Art of French Cooking', 'Knopf', 'January', '2018', 'Classic Cookbook', 'Cooking', '978-0-307-24357-4', 'Hardcover',false,11.99],
+        ['Dictionnaires', 'Merriam-Webster', 'Merriam-Webster\'s Collegiate Dictionary', 'Merriam-Webster', '', '', 'N/A', 'Reference', '978-0-87779-809-5', 'Leather Bound',false,8.99],
+        ['Droit', 'John Grisham', 'A Time to Kill', 'Dell', 'June', '2021', 'Jake Brigance Series', 'Legal Thriller', '978-0-440-22407-0', 'Ebook kindle',true,7],
+        ['Entreprise et Bourse', 'Malcolm Gladwell', 'Outliers: The Story of Success', 'Back Bay Books', 'February', '2023', 'N/A', 'Self-Help', '978-0-316-03669-6', 'Paperback',true , 4.99],
+        ['Young Adult', 'Veronica Roth', 'Divergent', 'Katherine Tegen Books', 'April', '2015', 'Divergent Series', 'Dystopian', '978-0-06-202403-9', 'Young Adult Paperback',true , 16.99],
+        ['Children\'s Books', 'Roald Dahl', 'Matilda', 'Puffin Books', 'September', '2020', 'N/A', 'Children\'s Fiction', '978-0-14-241037-0', 'Children\'s Paperback',true , 14.99],
+        ['Poetry', 'Rupi Kaur', 'Milk and Honey', 'Andrews McMeel Publishing', 'July', '2016', 'N/A', 'Poetry', '978-1-4494-7425-6', 'Poetry Collection',true,15.99],
+        ['Art, Music, and Cinema', 'David Hockney', 'A Bigger Grand Canyon', 'Thames & Hudson', 'October', '2022', 'Art Collection', 'Art', '978-0-500-55446-9', 'Hardcover',true,5.99],
+        ['Litterature', 'Gabriel Garcia Marquez', 'One Hundred Years of Solitude', 'Harper & Row', 'February', '2023', 'Magical Realism', 'Fiction', '978-0-06-112009-1', 'Ebook kindle',true,14.99],
+        ['Etude superieures', 'Stephen Hawking', 'A Brief History of Time', 'Bantam Books', 'September', '2019', 'Cosmology', 'Science', '978-0-553-10953-5', 'Poche et broché',false,18.99],
+        ['Santé et Bien-etre', 'Michael Pollan', 'In Defense of Food', 'Penguin Books', 'May', '2021', 'Nutrition', 'Health', '978-0-14-311496-3', 'Poche et broché',true,14.99],
+
+    ];
+
+    // SQL query to insert data into the table
+    $insertDataQuery = "INSERT INTO `" . DB_TABLE . "` 
+        (`mots_cles`, `author`, `titre`,  `Editeur`, `month_select`,`annee`, `collection`, `rubrique`, `isbn`,`format`,`best_sellers`,`price`) 
+        VALUES 
+        (:mots_cles, :author, :titre, :Editeur, :month_select, :annee, :collection, :rubrique, :isbn, :format, :best_sellers, :price)";
+
+    // Prepare and execute the data insertion query for each additional book
+    foreach ($additionalBooks as $book) {
+        list($mots_cles, $author, $titre, $Editeur, $month_select, $annee, $collection, $rubrique, $isbn, $format,$best_sellers,$price) = $book;
+        $annee = (int) $annee;
+
+        // Prepare and execute the query
+        $stmt = $connexion->prepare($insertDataQuery);
+        $stmt->bindParam(':mots_cles', $mots_cles);
+        $stmt->bindParam(':author', $author);
+        $stmt->bindParam(':titre', $titre);
+        $stmt->bindParam(':Editeur', $Editeur);
+        $stmt->bindParam(':month_select', $month_select);
+        $stmt->bindParam(':annee', $annee, PDO::PARAM_INT);
+        $stmt->bindParam(':collection', $collection);
+        $stmt->bindParam(':rubrique', $rubrique);
+        $stmt->bindParam(':isbn', $isbn);
+        $stmt->bindParam(':format', $format);
+        $stmt->bindParam(':best_sellers', $best_sellers, PDO::PARAM_BOOL);
+        $stmt->bindParam(':price', $price, PDO::PARAM_STR);
+        $stmt->execute();
+    }
+
+    // Search functionality
+    $searchFields = ['mots_cles', 'author', 'titre', 'Editeur', 'date_condition', 'month_select', 'annee', 'collection', 'rubrique', 'isbn', 'format'];
+    $sortOptions = ['best_sellers', 'price_asc', 'price_desc'];
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $searchValues = [];
+        $searchConditions = [];
+    
+        // Get the search values from the form
+        foreach ($searchFields as $field) {
+            // If the field is "rubrique" or "format", use the selected option value
+            if ($field === 'rubrique' || $field === 'format' || $field === 'date_condition' || $field === 'month_select') {
+                $searchValues[$field] = $_POST[$field];
+            } else {
+                $searchValues[$field] = isset($_POST[$field]) ? $_POST[$field] : '';
+            }
+        }
+    
+        // Create the search conditions
+        foreach ($searchFields as $field) {
+            if ($field === 'rubrique' && $searchValues[$field] !== 'Toutes') {
+                $searchConditions[] = "`$field` = :$field";
+            } elseif ($field === 'format' && $searchValues[$field] !== 'Tous les formats') {
+                $searchConditions[] = "`$field` = :$field";
+            } elseif ($field === 'date_condition' && $searchValues['date_condition'] !== 'Tous les dates') {
+                $dateCondition = $searchValues['date_condition'];
+                $year = $searchValues['annee'];
+            
+                switch ($dateCondition) {
+                    case 'avant':
+                        $searchConditions[] = "`annee` < :annee";
+                        break;
+                    case 'pendant':
+                        $searchConditions[] = "`annee` = :annee";
+                        if (!empty($searchValues['month_select'])) {
+                            $searchConditions[] = "`month_select` = :month_select";
+                        }
+                        break;
+                    case 'apres':
+                        $searchConditions[] = "`annee` > :annee";
+                        break;
+                }
+            
+                // Use a separate variable for the year condition
+                $stmt->bindParam(":annee", $year, PDO::PARAM_INT);
+            } elseif ($field === 'month_select' && !empty($searchValues['month_select'])) {
+                $searchConditions[] = "`$field` = :$field";
+            } elseif ($field !== 'rubrique' && $field !== 'format' && $field !== 'date_condition' && $field !== 'month_select' && !empty($searchValues[$field])) {
+                $searchConditions[] = "`$field` LIKE :$field";
+            }
+        }
+    
+        // Construct the search query
+        $searchQuery = "SELECT DISTINCT * FROM `" . DB_TABLE . "`";
+        if (!empty($searchConditions)) {
+            $searchQuery .= " WHERE " . implode(" OR ", $searchConditions);
+        }
+        $selectedSortOption = isset($_POST['sort']) ? $_POST['sort'] : '';
+
+    // Add sorting condition to the SQL query
+    if (!empty($selectedSortOption)) {
+        switch ($selectedSortOption) {
+            case 'best_sellers':
+                $searchQuery .= " ORDER BY best_sellers DESC";
+                break;
+            case 'price_asc':
+                $searchQuery .= " ORDER BY price ASC";
+                break;
+            case 'price_desc':
+                $searchQuery .= " ORDER BY price DESC";
+                break;
+        }
+    }
+    
+        // Prepare and execute the search query
+        $stmt = $connexion->prepare($searchQuery);
+    
+        // Define $dateCondition outside the loop
+        $dateCondition = $searchValues['date_condition'];
+    
+        foreach ($searchFields as $field) {
+            if ($field === 'rubrique' && $searchValues[$field] !== 'Toutes') {
+                $stmt->bindParam(":$field", $searchValues[$field], PDO::PARAM_STR);
+            } elseif ($field === 'format' && $searchValues[$field] !== 'Tous les formats') {
+                $stmt->bindParam(":$field", $searchValues[$field], PDO::PARAM_STR);
+            } elseif ($field === 'date_condition' && $dateCondition !== 'Tous les dates') {
+                // Convert year string to a valid date format for comparison
+                $year = $searchValues['annee'];
+                if ($dateCondition === 'avant') {
+                    $year .= '-12-31'; // end of the year
+                } elseif ($dateCondition === 'pendant') {
+                    $year .= '-01-01'; // start of the year
+                } elseif ($dateCondition === 'apres') {
+                    $year .= '-01-01'; // start of the next year
+                }
+                $stmt->bindParam(":annee", $year, PDO::PARAM_STR);
+            } elseif ($field === 'month_select' && !empty($searchValues['month_select'])) {
+                $stmt->bindParam(":month_select", $searchValues['month_select'], PDO::PARAM_STR);
+            } elseif ($field !== 'rubrique' && $field !== 'format' && $field !== 'date_condition' && $field !== 'month_select' && !empty($searchValues[$field])) {
+                // Use a separate variable for the LIKE condition
+                $likeCondition = "%" . $searchValues[$field] . "%";
+                $stmt->bindParam(":$field", $likeCondition, PDO::PARAM_STR);
+            }
+        }
+
+        $stmt->execute();
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } else {
+        $results = [];
+    }
+} catch (PDOException $e) {
+    echo "Error: " . $e->getMessage();
+}
+?>
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recherche détaillée : Livres</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: white; /* Updated background color */
+        }
+
+        td {
+            background: transparent url(https://images-eu.ssl-images-amazon.com/images/G/01/nav2/images/gui/grey-dot-vert-border._V44209678_.gif) repeat-y scroll right top;
+            padding-right: 15px;
+            width: 50%;
+        }
+
+        .asSection {
+            margin-bottom: 15px; /* Reduced margin */
+        }
+
+        .asLabel {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 3px; /* Reduced margin */
+            color: #666; /* Slightly lighter grey */
+        }
+
+        .asField,
+        select,
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            margin-bottom: 10px; /* Slightly increased margin */
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            margin-bottom: 10px; /* Slightly increased margin */
+        }
+
+        input[type="submit"] {
+            background-color: #fdbc69; /* Adjusted color */
+            color: #333;
+            padding: 10px;
+            cursor: pointer;
+            border: none;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #fccd8c; /* Adjusted hover color */
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Recherche détaillée : Livres</h1>
+
+    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+        <?php foreach ($searchFields as $field): ?>
+            <label for="<?php echo $field; ?>">Search by <?php echo ucfirst($field); ?>:</label>
+            <?php if ($field === 'rubrique'): ?>
+                <select name="rubrique">
+                    <?php
+                    // Extract unique rubriques from $additionalBooks
+                    $rubriques = array_unique(array_column($additionalBooks, 7));
+
+                    // Generate options for rubrique select form
+                    foreach ($rubriques as $rubrique) {
+                        echo "<option value=\"$rubrique\">$rubrique</option>";
+                    }
+                    ?>
+                    <option value="Toutes" selected>Toutes les rubriques</option>
+                </select><br>
+            <?php elseif ($field === 'format'): ?>
+                <select name="format">
+                    <option value="Tous les formats" selected>Tous les formats</option>
+                    <option value="Poche et broché">Poche et broché</option>
+                    <option value="Livre Audio">Livre Audio</option>
+                    <option value="Ebook kindle">Ebook kindle</option>
+                </select><br>
+            <?php elseif ($field === 'date_condition'): ?>
+                <select name="date_condition">
+                    <option value="Tous les dates" selected>Tous les dates</option>
+                    <option value="avant">avant</option>
+                    <option value="pendant">pendant</option>
+                    <option value="apres">apres</option>
+                </select><br>
+            <?php elseif ($field === 'month_select'): ?>
+                <select name="month_select">
+                    <option value="">All Months</option>
+                    <option value="January">January</option>
+                    <option value="February">February</option>
+                    <option value="March">March</option>
+                    <option value="April">April</option>
+                    <option value="May">May</option>
+                    <option value="June">June</option>
+                    <option value="July">July</option>
+                    <option value="August">August</option>
+                    <option value="September">September</option>
+                    <option value="October">October</option>
+                    <option value="November">November</option>
+                    <option value="December">December</option>
+                </select><br>
+                <label for="sort">Trier les résultats par:</label>
+<select name="sort" id="sort">
+    <option value="best_sellers">Meilleurs ventes</option>
+    <option value="price_asc">Prix par ordre croissant</option>
+    <option value="price_desc">Prix par ordre décroissant</option>
+</select><br>
+
+            <?php else: ?>
+                <input type="text" name="<?php echo $field; ?>" id="<?php echo $field; ?>" placeholder="Enter <?php echo $field; ?>">
+            <?php endif; ?>
+        <?php endforeach; ?>
+
+        <input type="submit" value="Search">
+    </form>
+
+    <?php if ($_SERVER['REQUEST_METHOD'] === 'POST'): ?>
+        <?php if (!empty($results)): ?>
+            <h2>Search Results:</h2>
+            <ul>
+                <?php foreach ($results as $book): ?>
+                    <li>
+                    <strong><?= $book['titre'] ?></strong> by <?= $book['author'] ?><br>
+                    Publisher: <?= $book['Editeur'] ?><br>
+                    ISBN: <?= $book['isbn'] ?><br>
+                    Format: <?= $book['format'] ?><br>
+                    Collection: <?= $book['collection'] ?><br>
+                    Price: $<?= $book['price'] ?> <!-- Display the price with a dollar sign -->
+                </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php else: ?>
+            <p>No results found.</p>
+        <?php endif; ?>
+    <?php endif; ?>
+</body>
+
 </html>
+
+
+
